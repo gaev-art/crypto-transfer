@@ -12,15 +12,23 @@
     "@moralisweb3/common-evm-utils": "^2.10.3",
     "@moralisweb3/common-sol-utils": "^2.10.3",
     "@next/font": "13.1.1",
+    "@solana/wallet-adapter-base": "^0.9.20",
+    "@solana/wallet-adapter-react": "^0.15.27",
+    "@solana/wallet-adapter-react-ui": "^0.9.26",
+    "@solana/wallet-adapter-wallets": "^0.19.9",
+    "@solana/web3.js": "^1.72.0",
     "@types/node": "18.11.17",
     "@types/react": "18.0.26",
     "@types/react-dom": "18.0.10",
     "eslint": "8.30.0",
     "eslint-config-next": "13.1.1",
+    "ethers": "^5.7.2",
+    "metamask-react": "^2.4.1",
     "moralis": "^2.10.3",
     "next": "13.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-toastify": "^9.1.1",
     "typescript": "4.9.4"
   }
 }
