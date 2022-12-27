@@ -4,7 +4,27 @@ import {LinearProgress, linearProgressClasses} from '@mui/material';
 import {showToast} from '../components/ShowToast';
 import {useMetaMask} from 'metamask-react';
 import {Form} from '../components/Form';
-import {ResponseType} from './solana';
+import {ResponseType, TokenType} from './solana';
+import {ContractInterface, ethers} from 'ethers';
+import {web3ApiVersionOperation} from '@moralisweb3/common-evm-utils';
+
+export const ERC20_CONTRACT_INTERFACE: ContractInterface = [
+  'function name() public view returns (string)',
+  'function symbol() public view returns (string)',
+  'function decimals() public view returns (uint8)',
+  'function totalSupply() public view returns (uint256)',
+  'function balanceOf(address _owner) public view returns (uint256 balance)',
+  'function transfer(address _to, uint256 _value) public returns (bool success)',
+  'function transferFrom(address _from, address _to, uint256 _value) public returns (bool success)',
+  'function approve(address _spender, uint256 _value) public returns (bool success)',
+  'function allowance(address _owner, address _spender) public view returns (uint256 remaining)',
+];
+
+declare global {
+  interface Window {
+    ethereum: ethers.providers.ExternalProvider;
+  }
+}
 
 const TYPE_NETWORK = ['ETHEREUM', 'GOERLI', 'POLYGON'];
 
@@ -23,6 +43,21 @@ const Index = () => {
 
   const onChangeHandler = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     setNetwork(e.target.value);
+  };
+
+  const startPayment = async (ether: string, addr: string, token: TokenType) => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      ethers.utils.getAddress(addr);
+      const erc20 = new ethers.Contract(token.associatedTokenAddress, ERC20_CONTRACT_INTERFACE, signer);
+      const tx = await erc20.transfer(addr, ethers.utils.parseUnits(ether, token.decimals));
+      await tx.wait();
+      showToast('Transaction completed', 'success');
+    } catch (err: any) {
+      showToast(err.reason as string, 'error');
+      console.error({error: err});
+    }
   };
 
   return (
@@ -121,7 +156,7 @@ const Index = () => {
           );
         })}
       </div>}
-      {!!account ? (<Form data={data?.tokens}/>) : (<h1>Connect your wallet</h1>)}
+      {!!account ? (<Form data={data?.tokens} startPayment={startPayment}/>) : (<h1>Connect your wallet</h1>)}
 
     </div>
   );

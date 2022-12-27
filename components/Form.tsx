@@ -3,13 +3,20 @@ import {TokenType} from '../pages/solana';
 
 type Props = {
   data: TokenType[] | undefined
+  startPayment?: (ether: string, addr: string, token: TokenType) => void
 };
 
-export const Form = ({data}: Props) => {
+export const Form = ({data, startPayment}: Props) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert('Submit');
+    const dataForm = new FormData(e.currentTarget);
+    const address = dataForm.get('addr');
+    const value = dataForm.get('ether');
+    const tokenTitle = dataForm.get('token');
+    const token = data?.filter(token => token.associatedTokenAddress === tokenTitle);
+    if (token && address && token)
+      startPayment && startPayment(String(value), String(address), token[0]);
   };
   return (
     <form style={{display: 'flex', flexDirection: 'column', width: '100%'}} onSubmit={handleSubmit}>
@@ -21,7 +28,10 @@ export const Form = ({data}: Props) => {
                 <select className="input" name="token" id="tokens" style={{cursor: 'pointer'}}>
                   {data.map((token, i) => (
                     <option key={token.amount}
-                            value={token.symbol}>{token.symbol === '' ? `Unknown token-${++i}` : token.symbol}</option>
+                            value={token.associatedTokenAddress}
+                    >
+                      {token.symbol === '' ? `Unknown token-${++i}` : token.symbol}
+                    </option>
                   ))}
                 </select>
               </div>

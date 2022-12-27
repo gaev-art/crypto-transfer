@@ -1,6 +1,6 @@
 import {toast} from 'react-toastify';
 
-export const showToast = (message: string, type: string) => {
+export const showToast = (message: any, type: string) => {
   const options = {
     position: 'bottom-left',
     autoClose: 7000,
