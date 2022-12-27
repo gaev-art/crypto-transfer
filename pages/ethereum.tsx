@@ -4,12 +4,13 @@ import {LinearProgress, linearProgressClasses} from '@mui/material';
 import {showToast} from '../components/ShowToast';
 import {useMetaMask} from 'metamask-react';
 import {Form} from '../components/Form';
+import {ResponseType} from './solana';
 
-const TYPE_NETWORK = ['GOERLI', 'POLYGON', 'ETHEREUM'];
+const TYPE_NETWORK = ['ETHEREUM', 'GOERLI', 'POLYGON'];
 
 const Index = () => {
   const {connect, ethereum, status, account} = useMetaMask();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<ResponseType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [network, setNetwork] = useState(TYPE_NETWORK[0]);
 
@@ -30,14 +31,14 @@ const Index = () => {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      gap: '20px'
     }}>
       <div style={{
-        height: '20%',
         display: 'flex',
         alignItems: 'flex-start',
         gap: '5px',
-        flexDirection: 'column'
+        flexDirection: 'column',
       }}>
         <div className="button-container" style={{width: '100%'}}>
           {status === 'connected' ? (
@@ -107,7 +108,20 @@ const Index = () => {
           }}
         />}
       </div>
-      {!!account ? (<Form data={data}/>) : (<h1>Connect your wallet</h1>)}
+      {data && data.tokens.length !== 0 && <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        alignItems: 'flex-start',
+      }}>
+        <h3>Balance the wallet</h3>
+        {data?.tokens.map((token, i) => {
+          return (
+            <div key={token.amount}>{token.symbol === '' ? `Unknown token-${++i}` : token.symbol} = {token.amount}</div>
+          );
+        })}
+      </div>}
+      {!!account ? (<Form data={data?.tokens}/>) : (<h1>Connect your wallet</h1>)}
 
     </div>
   );

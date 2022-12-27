@@ -8,6 +8,20 @@ export default async function handler(request: NextApiRequest, response: NextApi
   if (request.method === 'POST') {
     const {chain} = request.query;
     const {walletAddress, network} = request.body;
+
+    const getSymbol = (network: string) => {
+      switch (network) {
+        case 'GOERLI':
+          return {symbol: 'GoerliETH', name: 'goerli', decimals: '18'};
+        case 'ETHEREUM':
+          return {symbol: 'ETH', name: 'ethereum', decimals: '16'};
+        case 'POLYGON':
+          return {symbol: 'MATIC', name: 'matic', decimals: '18'};
+        default:
+          throw 'Incorrect blockchain identifier';
+      }
+    };
+
     try {
       await connectMoralis();
 
@@ -23,11 +37,17 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 address: walletAddress as string,
               }),
             ]);
+            const solTokens: {}[] = [...tokensBalances[0].raw.tokens, {
+              amount: tokensBalances[0].raw.nativeBalance.solana,
+              amountRaw: tokensBalances[0].raw.nativeBalance.solana,
+              associatedTokenAddress: '',
+              decimals: '6',
+              mint: '',
+              name: 'solana',
+              symbol: 'SOL',
 
-            response.status(200).json({
-              walletAddress: walletAddress,
-              tokensBalances: tokensBalances[0],
-            });
+            }];
+            response.status(200).json({tokens: solTokens});
             break;
           case 'ethereum':
             const [nativeBalance, tokenBalances] = await Promise.all([
@@ -40,11 +60,31 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 address: walletAddress as string,
               }),
             ]);
-            response.status(200).json({
-              walletAddress: walletAddress,
-              nativeBalance: nativeBalance.result.balance.ether,
-              tokenBalances: tokenBalances.result.map((token) => token),
-            });
+
+            const ethTokens: {}[] = [...tokenBalances.raw.map((token) => {
+              return {
+                amount: String(+token.balance / 10 ** token.decimals),
+                amountRaw: +token.balance,
+                associatedTokenAddress: token.token_address,
+                decimals: token.decimals,
+                mint: token.token_address,
+                name: token.name,
+                symbol: token.symbol,
+              };
+            })];
+            if (nativeBalance.raw.balance !== '0') {
+              ethTokens.push({
+                amount: String(+nativeBalance.raw.balance / 10 ** +getSymbol(network).decimals),
+                amountRaw: nativeBalance.raw.balance,
+                associatedTokenAddress: '',
+                decimals: getSymbol(network).decimals,
+                mint: '',
+                name: getSymbol(network).name,
+                symbol: getSymbol(network).symbol,
+
+              });
+            }
+            response.status(200).json({tokens: ethTokens});
             break;
           default:
             response.status(200).json({

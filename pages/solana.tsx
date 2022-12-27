@@ -6,12 +6,21 @@ import {showToast} from '../components/ShowToast';
 import {PhantomWalletName} from '@solana/wallet-adapter-phantom';
 import {Form} from '../components/Form';
 
-
-const TYPE_NETWORK = ['DEVNET', 'MAINNET'];
+export type TokenType = {
+  amount: string,
+  amountRaw: string,
+  associatedTokenAddress: string,
+  decimals: string,
+  mint: string,
+  name: string,
+  symbol: string,
+}
+export type ResponseType = { tokens: TokenType[], walletAddress: string }
+const TYPE_NETWORK = ['MAINNET', 'DEVNET'];
 
 const Index = () => {
   const {publicKey, connect, connected, select, disconnect} = useWallet();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<ResponseType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [network, setNetwork] = useState(TYPE_NETWORK[0]);
 
@@ -32,10 +41,10 @@ const Index = () => {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      gap: '20px'
     }}>
       <div style={{
-        height: '20%',
         display: 'flex',
         alignItems: 'flex-start',
         gap: '5px',
@@ -113,7 +122,20 @@ const Index = () => {
           }}
         />}
       </div>
-      {!!publicKey?.toString() ? (<Form data={data}/>) : (<h1>Connect your wallet</h1>)}
+      {data && data.tokens.length !== 0 && <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        alignItems: 'flex-start',
+      }}>
+        <h3>Balance the wallet</h3>
+        {data?.tokens.map((token, i) => {
+          return (
+            <div key={token.amount}>{token.symbol === '' ? `Unknown token-${++i}` : token.symbol} = {token.amount}</div>
+          );
+        })}
+      </div>}
+      {!!publicKey?.toString() ? (<Form data={data?.tokens}/>) : (<h1>Connect your wallet</h1>)}
     </div>
   );
 };
