@@ -2,12 +2,17 @@ import React, {ReactNode} from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
+import {showToast} from './ShowToast';
+import {useWallet} from '@solana/wallet-adapter-react';
+import {PhantomWalletName} from '@solana/wallet-adapter-phantom';
 
 type Props = {
   children: ReactNode
 };
 export const Layout = ({children}: Props) => {
+  const {disconnect, connected, connect, select} = useWallet();
   const router = useRouter();
+
   return (
     <>
       <Head>

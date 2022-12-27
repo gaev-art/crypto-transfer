@@ -6,20 +6,20 @@ import {EvmChain} from '@moralisweb3/common-evm-utils';
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
   if (request.method === 'POST') {
-    const {network} = request.query;
-    const {walletAddress} = request.body;
+    const {chain} = request.query;
+    const {walletAddress, network} = request.body;
     try {
       await connectMoralis();
 
-      if (!network) response.status(200).json({
+      if (!chain) response.status(200).json({
         message: 'Add a network on request.'
       });
       if (walletAddress)
-        switch (network) {
+        switch (chain) {
           case 'solana':
             const tokensBalances = await Promise.all([
               Moralis.SolApi.account.getPortfolio({
-                network: SolNetwork.DEVNET,
+                network: SolNetwork[network as 'DEVNET' | 'MAINNET'],
                 address: walletAddress as string,
               }),
             ]);
@@ -32,11 +32,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
           case 'ethereum':
             const [nativeBalance, tokenBalances] = await Promise.all([
               Moralis.EvmApi.balance.getNativeBalance({
-                chain: EvmChain.GOERLI,
+                chain: EvmChain[network as 'GOERLI' | 'POLYGON' | 'ETHEREUM'],
                 address: walletAddress as string,
               }),
               Moralis.EvmApi.token.getWalletTokenBalances({
-                chain: EvmChain.GOERLI,
+                chain: EvmChain[network as 'GOERLI' | 'POLYGON' | 'ETHEREUM'],
                 address: walletAddress as string,
               }),
             ]);

@@ -14,7 +14,7 @@
 
 html,
 body {
-    max-width: 100vw;
+    max-width: 100vw;;
     overflow-x: hidden;
     background-color: #131313;
     color: white;
@@ -31,16 +31,73 @@ body {
 
 .content {
     height: calc(100vh - 70px);
+    width: 100vw;
     display: flex;
     justify-content: center;
     padding: 30px;
 }
 
 a {
+    font-size: 20px;
     color: white;
     text-decoration: none;
 }
 
 .active {
-    color: red;
+    color: #E87B71;
 }
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: end;
+}
+
+.cta-button {
+    height: 50px;
+    border: 0;
+    width: auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.cta-button:hover, .input:hover {
+    color: #E87B71;
+}
+
+.cta-button:disabled {
+    cursor: not-allowed;
+}
+
+.cta-button:disabled:hover, .input:disabled:hover {
+    color: white;
+}
+
+.connect-wallet-button {
+    color: white;
+    background: rgb(46, 46, 46);
+    background-size: 200% 200%;
+    animation: gradient-animation 4s ease infinite;
+    width: 200px;
+}
+
+.input {
+    background-color: rgb(46, 46, 46);
+    border: none;
+    font-size: 1.1rem;
+    padding: 15px;
+    border-radius: 7px;
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+
+
+
