@@ -7,6 +7,8 @@ import {Form} from '../components/Form';
 import {ResponseType, TokenType} from './solana';
 import {ContractInterface, ethers} from 'ethers';
 import {web3ApiVersionOperation} from '@moralisweb3/common-evm-utils';
+import Link from 'next/link';
+import {useRouter} from 'next/router';
 
 export const ERC20_CONTRACT_INTERFACE: ContractInterface = [
   'function name() public view returns (string)',
@@ -29,9 +31,11 @@ declare global {
 const TYPE_NETWORK = ['ETHEREUM', 'GOERLI', 'POLYGON'];
 
 const Index = () => {
+  const router = useRouter();
   const {connect, ethereum, status, account} = useMetaMask();
   const [data, setData] = useState<ResponseType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTrx, setIsLoadingTrx] = useState(false);
   const [network, setNetwork] = useState(TYPE_NETWORK[0]);
 
   const fetch = async () => {
@@ -47,6 +51,7 @@ const Index = () => {
 
   const startPayment = async (ether: string, addr: string, token: TokenType) => {
     try {
+      setIsLoadingTrx(true);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       ethers.utils.getAddress(addr);
@@ -57,29 +62,19 @@ const Index = () => {
     } catch (err: any) {
       showToast(err.reason as string, 'error');
       console.error({error: err});
+    } finally {
+      setIsLoadingTrx(false);
     }
   };
 
   return (
-    <div style={{
-      width: '100wv',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      gap: '20px'
-    }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '5px',
-        flexDirection: 'column',
-      }}>
-        <div className="button-container" style={{width: '100%'}}>
+    <div className="w-full h-full flex flex-col items-center gap-[20px] self-center relative">
+      <Link href={'/'} className={router.pathname == '/' ? 'link active' : 'link'}>+</Link>
+      <div className="flex items-start flex-col self-center gap-[5px]">
+        <div className="w-full button-container">
           {status === 'connected' ? (
             <button
-              style={{width: '100%'}}
-              className="cta-button connect-wallet-button"
+              className="w-full cta-button connect-wallet-button"
               onClick={async () => {
                 ethereum._events.accountsChanged([]);
                 setData(null);
@@ -90,8 +85,7 @@ const Index = () => {
             </button>
           ) : (
             <button
-              style={{width: '100%'}}
-              className="cta-button connect-wallet-button"
+              className="w-full cta-button connect-wallet-button"
               onClick={async () => {
                 await connect();
                 showToast('Connected wallet', 'success');
@@ -101,7 +95,7 @@ const Index = () => {
             </button>
           )}
         </div>
-        <div style={{display: 'flex', gap: '5px',}}>
+        <div className="flex self-center gap-[5px]">
           <button
             className="cta-button connect-wallet-button"
             onClick={async () => {
@@ -116,8 +110,7 @@ const Index = () => {
             Get wallet info!
           </button>
           <select
-            style={{cursor: 'pointer'}}
-            className="input"
+            className="cursor-pointer input"
             name="token"
             id="tokens"
             onChange={onChangeHandler}
@@ -143,21 +136,28 @@ const Index = () => {
           }}
         />}
       </div>
-      {data && data.tokens.length !== 0 && <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        alignItems: 'flex-start',
-      }}>
-        <h3>Balance the wallet</h3>
-        {data?.tokens.map((token, i) => {
-          return (
+      {data && data.tokens.length !== 0 && (
+        <div className="flex flex-col items-start self-center gap-[5px]">
+          <h3>Balance the wallet</h3>
+          {data?.tokens.map((token, i) => (
             <div key={token.amount}>{token.symbol === '' ? `Unknown token-${++i}` : token.symbol} = {token.amount}</div>
-          );
-        })}
-      </div>}
+          ))}
+        </div>
+      )}
       {!!account ? (<Form data={data?.tokens} startPayment={startPayment}/>) : (<h1>Connect your wallet</h1>)}
-
+      {isLoadingTrx && <LinearProgress
+        sx={{
+          borderRadius: '4px',
+          height: '2px',
+          width: '200px',
+          [`&.${linearProgressClasses.colorPrimary}`]: {
+            backgroundColor: '#ff8867',
+          },
+          [`& .${linearProgressClasses.bar}`]: {
+            backgroundColor: '#fad2fa',
+          },
+        }}
+      />}
     </div>
   );
 };
